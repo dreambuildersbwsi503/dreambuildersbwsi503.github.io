@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Melody Motion · Keyboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --black:    #060608;
+      --deep:     #0c0a12;
+      --purple:   #7b2ff7;
+      --purple2:  #a855f7;
+      --electric: #bf5fff;
+      --glow:     #d49eff;
+      --dim:      #2a1a40;
+      --text:     #e8d5ff;
+      --muted:    #6b4d8a;
+      --white:    #ffffff;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Share Tech Mono', monospace;
+      background: var(--black);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ── GRID BACKGROUND ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(123,47,247,.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(123,47,247,.07) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 70% 50% at 50% 0%, rgba(123,47,247,.18) 0%, transparent 65%),
+        radial-gradient(ellipse 40% 30% at 20% 80%, rgba(191,95,255,.1) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── HEADER ── */
+    header {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 2.5rem 1rem 1rem;
+      width: 100%;
+    }
+
+    .back-link {
+      position: absolute;
+      left: 1.5rem;
+      top: 2.8rem;
+      font-size: .75rem;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      transition: color .2s;
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+    }
+    .back-link:hover { color: var(--electric); }
+
+    .logo-tag {
+      font-size: .7rem;
+      letter-spacing: .25em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: .4rem;
+    }
+
+    h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(2rem, 6vw, 3.8rem);
+      font-weight: 900;
+      letter-spacing: .08em;
+      background: linear-gradient(135deg, var(--electric), var(--purple2), var(--glow));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: flicker 6s ease-in-out infinite;
+    }
+
+    @keyframes flicker {
+      0%,95%,100% { opacity:1; }
+      96%          { opacity:.85; }
+      97%          { opacity:1; }
+      98%          { opacity:.9; }
+    }
+
+    .subtitle {
+      font-size: .8rem;
+      color: var(--muted);
+      letter-spacing: .15em;
+      margin-top: .5rem;
+      text-transform: uppercase;
+    }
+
+    .octave-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      margin-top: 1rem;
+      padding: .35rem 1rem;
+      border: 1px solid rgba(123,47,247,.4);
+      border-radius: 999px;
+      font-size: .75rem;
+      letter-spacing: .12em;
+      color: var(--electric);
+      background: rgba(123,47,247,.08);
+    }
+    .octave-badge .dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--purple2);
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%,100% { box-shadow: 0 0 4px var(--purple2); }
+      50%      { box-shadow: 0 0 12px var(--electric); }
+    }
+
+    /* ── MAIN ── */
+    main {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.4rem;
+      padding: 2rem 1.5rem 3rem;
+      width: 100%;
+      max-width: 700px;
+    }
+
+    /* ── WAVEFORM VISUALIZER ── */
+    .visualizer {
+      width: 100%;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+    }
+    .vis-bar {
+      width: 4px;
+      border-radius: 2px;
+      background: var(--purple2);
+      height: 4px;
+      transition: height .08s ease, background .1s;
+    }
+
+    /* ── TYPE AREA ── */
+    .type-section {
+      width: 100%;
+      background: rgba(123,47,247,.06);
+      border: 1px solid rgba(123,47,247,.25);
+      border-radius: 16px;
+      padding: 1.4rem 1.6rem;
+    }
+
+    .type-section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      gap: .5rem;
+    }
+
+    .type-section-title {
+      font-size: .68rem;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .hint-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .35rem;
+    }
+    .chip {
+      font-size: .6rem;
+      letter-spacing: .08em;
+      padding: .2rem .5rem;
+      border-radius: 6px;
+      background: rgba(123,47,247,.15);
+      border: 1px solid rgba(123,47,247,.3);
+      color: var(--electric);
+      white-space: nowrap;
+    }
+
+    .type-input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+    }
+
+    textarea {
+      flex: 1;
+      background: rgba(0,0,0,.45);
+      border: 1.5px solid rgba(123,47,247,.35);
+      border-radius: 12px;
+      color: var(--white);
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(.9rem, 2.5vw, 1.1rem);
+      font-weight: 700;
+      letter-spacing: .08em;
+      padding: 1rem 1.2rem;
+      resize: none;
+      height: 90px;
+      outline: none;
+      line-height: 1.6;
+      transition: border-color .2s, box-shadow .2s;
+      caret-color: var(--electric);
+    }
+    textarea::placeholder { color: var(--muted); font-weight: 400; font-size: .85rem; letter-spacing: .1em; }
+    textarea:focus {
+      border-color: var(--electric);
+      box-shadow: 0 0 18px rgba(191,95,255,.2);
+    }
+
+    .play-btn {
+      padding: .75rem 1.4rem;
+      background: linear-gradient(135deg, var(--purple), var(--electric));
+      border: none;
+      border-radius: 12px;
+      color: var(--white);
+      font-family: 'Orbitron', sans-serif;
+      font-size: .75rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      cursor: pointer;
+      transition: box-shadow .2s, transform .15s;
+      white-space: nowrap;
+      align-self: stretch;
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+    }
+    .play-btn:hover { box-shadow: 0 0 22px rgba(191,95,255,.5); transform: translateY(-1px); }
+    .play-btn:active { transform: scale(.96); }
+    .play-btn.playing {
+      background: linear-gradient(135deg, #3a0a6e, #6b2fd4);
+      box-shadow: 0 0 28px rgba(123,47,247,.6);
+    }
+
+    /* current-note display */
+    .now-playing {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      padding: .5rem 1rem;
+      border-radius: 10px;
+      background: rgba(123,47,247,.1);
+      border: 1px solid rgba(123,47,247,.2);
+      font-size: .75rem;
+      letter-spacing: .12em;
+      color: var(--muted);
+      min-height: 2.2rem;
+      transition: color .15s;
+    }
+    .now-playing.active { color: var(--glow); border-color: rgba(191,95,255,.4); }
+    .now-playing .note-pill {
+      font-family: 'Orbitron', sans-serif;
+      font-size: .95rem;
+      font-weight: 700;
+      color: var(--electric);
+      min-width: 3ch;
+    }
+
+    /* token preview row */
+    .token-preview {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .35rem;
+      min-height: 1.6rem;
+    }
+    .token-chip {
+      font-size: .65rem;
+      padding: .15rem .5rem;
+      border-radius: 6px;
+      background: rgba(123,47,247,.12);
+      border: 1px solid rgba(123,47,247,.25);
+      color: var(--muted);
+      letter-spacing: .06em;
+      transition: background .15s, color .15s, border-color .15s;
+    }
+    .token-chip.hit   { background: rgba(191,95,255,.25); border-color: var(--electric); color: var(--white); }
+    .token-chip.error { background: rgba(180,30,30,.2);   border-color: #e05555;         color: #ff8888; }
+
+    /* ── CONTROLS SHARED ── */
+    .controls-wrap {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .ctrl-row {
+      background: rgba(123,47,247,.06);
+      border: 1px solid rgba(123,47,247,.2);
+      border-radius: 16px;
+      padding: 1.2rem 1.6rem;
+    }
+
+    .ctrl-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: .9rem;
+    }
+    .ctrl-label {
+      font-size: .68rem;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .ctrl-value {
+      font-family: 'Orbitron', sans-serif;
+      font-size: .95rem;
+      font-weight: 700;
+      color: var(--electric);
+      letter-spacing: .1em;
+      min-width: 2.5ch;
+      text-align: right;
+    }
+
+    .seg-row {
+      display: flex;
+      gap: .5rem;
+      flex-wrap: wrap;
+    }
+    .seg-btn {
+      flex: 1;
+      min-width: 2.2rem;
+      padding: .55rem .2rem;
+      border-radius: 10px;
+      border: 1.5px solid rgba(123,47,247,.3);
+      background: rgba(123,47,247,.07);
+      color: var(--muted);
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(.7rem, 2vw, .9rem);
+      font-weight: 700;
+      letter-spacing: .06em;
+      cursor: pointer;
+      transition: background .15s, border-color .15s, color .15s, box-shadow .15s, transform .1s;
+      text-align: center;
+    }
+    .seg-btn:hover { border-color: rgba(191,95,255,.5); color: var(--glow); }
+    .seg-btn.active {
+      background: rgba(123,47,247,.35);
+      border-color: var(--electric);
+      color: var(--white);
+      box-shadow: 0 0 14px rgba(191,95,255,.4), inset 0 0 8px rgba(123,47,247,.2);
+    }
+    .seg-btn:active { transform: scale(.94); }
+
+    /* ── FOOTER ── */
+    footer {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 1.5rem;
+      font-size: .65rem;
+      color: var(--muted);
+      letter-spacing: .15em;
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="index.html" class="back-link">← Back</a>
+    <div class="logo-tag">Melody Motion</div>
+    <h1>KEYBOARD</h1>
+    <p class="subtitle">Type a note · Hear it play</p>
+    <div class="octave-badge">
+      <span class="dot"></span>
+      <span id="octave-display">Base · C4</span>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- WAVEFORM VISUALIZER -->
+    <div class="visualizer" id="visualizer"></div>
+
+    <!-- TYPE AREA -->
+    <div class="type-section">
+      <div class="type-section-header">
+        <span class="type-section-title">Type Solfège Notes</span>
+        <div class="hint-chips">
+          <span class="chip">do re mi</span>
+          <span class="chip">fa sol la</span>
+          <span class="chip">ti do2↑</span>
+        </div>
+      </div>
+
+      <div class="type-input-wrap">
+        <textarea id="note-input" placeholder="Type notes here… e.g.  do re mi fa sol la ti do2" spellcheck="false" autocomplete="off" autocorrect="off"></textarea>
+        <button class="play-btn" id="play-btn">▶ PLAY</button>
+      </div>
+
+      <!-- token preview -->
+      <div class="token-preview" id="token-preview" style="margin-top:.75rem;"></div>
+
+      <!-- now-playing bar -->
+      <div class="now-playing" id="now-playing" style="margin-top:.6rem;">
+        <span>NOW PLAYING</span>
+        <span class="note-pill" id="now-note">—</span>
+      </div>
+    </div>
+
+    <!-- NOTE DURATION -->
+    <div class="controls-wrap">
+
+      <div class="ctrl-row">
+        <div class="ctrl-header">
+          <span class="ctrl-label">Note Duration</span>
+          <span class="ctrl-value" id="dur-display">1s</span>
+        </div>
+        <div class="seg-row" id="dur-seg"></div>
+      </div>
+
+      <!-- BASE NOTE -->
+      <div class="ctrl-row">
+        <div class="ctrl-header">
+          <span class="ctrl-label">Base Note</span>
+          <span class="ctrl-value" id="note-display">C</span>
+        </div>
+        <div class="seg-row" id="note-seg"></div>
+      </div>
+
+      <!-- OCTAVE -->
+      <div class="ctrl-row">
+        <div class="ctrl-header">
+          <span class="ctrl-label">Octave</span>
+          <span class="ctrl-value" id="octave-display-num">4</span>
+        </div>
+        <div class="seg-row" id="octave-seg"></div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer>Melody Motion · Keyboard Module</footer>
+
+  <script>
+    // ── Solfège token map ────────────────────────────────────────
+    // do2 = one octave above do (semitone 12)
+    const SOLFEGE_MAP = {
+      'do':  0,
+      're':  2,
+      'mi':  4,
+      'fa':  5,
+      'sol': 7,
+      'la':  9,
+      'ti':  11,
+      'do2': 12,
+    };
+
+    // Sort keys longest-first so "do2" matches before "do"
+    const SOLFEGE_KEYS = Object.keys(SOLFEGE_MAP).sort((a,b) => b.length - a.length);
+
+    // ── State ────────────────────────────────────────────────────
+    let baseNoteLetter = 'C';
+    let baseOctave     = 4;
+    let noteDuration   = 1; // seconds
+    let audioCtx       = null;
+    let isPlaying      = false;
+    let stopRequested  = false;
+
+    // ── Audio helpers ────────────────────────────────────────────
+    function getAudioCtx() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      return audioCtx;
+    }
+
+    function midiToFreq(midi) {
+      return 440 * Math.pow(2, (midi - 69) / 12);
+    }
+
+    const NOTE_SEMITONES = { C:0, D:2, E:4, F:5, G:7, A:9, B:11 };
+
+    function computeBaseFreq() {
+      const midi = 24 + (baseOctave - 1) * 12 + NOTE_SEMITONES[baseNoteLetter];
+      return midiToFreq(midi);
+    }
+
+    // Play a single note for `duration` seconds, returns a Promise
+    function playNoteFor(semitone, duration) {
+      return new Promise(resolve => {
+        const ctx  = getAudioCtx();
+        const freq = computeBaseFreq() * Math.pow(2, semitone / 12);
+
+        const osc  = ctx.createOscillator();
+        const osc2 = ctx.createOscillator();
+        osc.type  = 'sine';
+        osc2.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, ctx.currentTime);
+        osc2.frequency.setValueAtTime(freq * 2, ctx.currentTime);
+
+        const gain  = ctx.createGain();
+        const gain2 = ctx.createGain();
+
+        const attackT = Math.min(.015, duration * .1);
+        const releaseT = Math.min(.12, duration * .15);
+        const sustainEnd = ctx.currentTime + duration - releaseT;
+
+        // attack
+        gain.gain.setValueAtTime(0, ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(.45, ctx.currentTime + attackT);
+        gain2.gain.setValueAtTime(0, ctx.currentTime);
+        gain2.gain.linearRampToValueAtTime(.08, ctx.currentTime + attackT);
+
+        // sustain → release
+        gain.gain.setValueAtTime(.45, sustainEnd);
+        gain.gain.exponentialRampToValueAtTime(.0001, sustainEnd + releaseT);
+        gain2.gain.setValueAtTime(.08, sustainEnd);
+        gain2.gain.exponentialRampToValueAtTime(.0001, sustainEnd + releaseT * .8);
+
+        osc.connect(gain);    gain.connect(ctx.destination);
+        osc2.connect(gain2);  gain2.connect(ctx.destination);
+
+        const stopAt = ctx.currentTime + duration + .05;
+        osc.start();   osc.stop(stopAt);
+        osc2.start();  osc2.stop(stopAt);
+
+        animateVisualizer(freq);
+        setTimeout(resolve, (duration) * 1000);
+      });
+    }
+
+    // ── Tokeniser ────────────────────────────────────────────────
+    function tokenise(text) {
+      const tokens = [];
+      let i = 0;
+      const t = text.toLowerCase().trim();
+      while (i < t.length) {
+        // skip whitespace/commas
+        if (/[\s,]/.test(t[i])) { i++; continue; }
+        let matched = false;
+        for (const key of SOLFEGE_KEYS) {
+          if (t.startsWith(key, i)) {
+            tokens.push({ raw: key, semitone: SOLFEGE_MAP[key], valid: true });
+            i += key.length;
+            matched = true;
+            break;
+          }
+        }
+        if (!matched) {
+          // collect unknown chars into error token
+          let word = '';
+          while (i < t.length && !/[\s,]/.test(t[i])) { word += t[i]; i++; }
+          if (word) tokens.push({ raw: word, semitone: null, valid: false });
+        }
+      }
+      return tokens;
+    }
+
+    // ── Token preview ────────────────────────────────────────────
+    const previewEl = document.getElementById('token-preview');
+
+    function renderPreview(tokens, activeIdx = -1) {
+      previewEl.innerHTML = '';
+      tokens.forEach((tok, idx) => {
+        const chip = document.createElement('span');
+        chip.className = 'token-chip' +
+          (tok.valid ? (idx === activeIdx ? ' hit' : '') : ' error');
+        chip.textContent = tok.raw.toUpperCase();
+        previewEl.appendChild(chip);
+      });
+    }
+
+    // live preview on input
+    document.getElementById('note-input').addEventListener('input', e => {
+      const tokens = tokenise(e.target.value);
+      renderPreview(tokens);
+    });
+
+    // ── Playback ─────────────────────────────────────────────────
+    const playBtn    = document.getElementById('play-btn');
+    const nowPlaying = document.getElementById('now-playing');
+    const nowNote    = document.getElementById('now-note');
+
+    playBtn.addEventListener('click', async () => {
+      if (isPlaying) {
+        stopRequested = true;
+        return;
+      }
+
+      const raw    = document.getElementById('note-input').value;
+      const tokens = tokenise(raw);
+      const valid  = tokens.filter(t => t.valid);
+      if (!valid.length) return;
+
+      isPlaying     = true;
+      stopRequested = false;
+      playBtn.textContent = '■ STOP';
+      playBtn.classList.add('playing');
+
+      for (let i = 0; i < tokens.length; i++) {
+        if (stopRequested) break;
+        const tok = tokens[i];
+        renderPreview(tokens, i);
+
+        if (!tok.valid) continue;
+
+        nowPlaying.classList.add('active');
+        nowNote.textContent = tok.raw.toUpperCase();
+
+        await playNoteFor(tok.semitone, noteDuration);
+        if (stopRequested) break;
+
+        // tiny gap between notes
+        await new Promise(r => setTimeout(r, 60));
+      }
+
+      isPlaying = false;
+      stopRequested = false;
+      playBtn.textContent = '▶ PLAY';
+      playBtn.classList.remove('playing');
+      nowPlaying.classList.remove('active');
+      nowNote.textContent = '—';
+      renderPreview(tokens);
+    });
+
+    // ── Visualizer ───────────────────────────────────────────────
+    const visEl = document.getElementById('visualizer');
+    const BAR_COUNT = 32;
+    const bars = [];
+    for (let i = 0; i < BAR_COUNT; i++) {
+      const b = document.createElement('div');
+      b.className = 'vis-bar';
+      visEl.appendChild(b);
+      bars.push(b);
+    }
+
+    let visRafId = null;
+
+    function animateVisualizer(freq) {
+      if (visRafId) cancelAnimationFrame(visRafId);
+      const start = performance.now();
+      const dur   = noteDuration * 1000;
+
+      function frame(now) {
+        const t     = (now - start) / dur;
+        const decay = Math.max(0, 1 - t);
+        if (t >= 1) { bars.forEach(b => b.style.height = '4px'); visRafId = null; return; }
+        bars.forEach((b, i) => {
+          const wave = Math.sin(now / 120 + i * .45) * decay;
+          const h = 4 + Math.max(0, wave) * 40;
+          b.style.height = h + 'px';
+          b.style.background = decay > .6 ? 'var(--glow)' : 'var(--purple2)';
+        });
+        visRafId = requestAnimationFrame(frame);
+      }
+      visRafId = requestAnimationFrame(frame);
+    }
+
+    // ── Duration selector ────────────────────────────────────────
+    const DURATIONS = [0.5, 1, 1.5, 2, 3, 4];
+    const durSeg    = document.getElementById('dur-seg');
+    const durDisplay = document.getElementById('dur-display');
+
+    DURATIONS.forEach(d => {
+      const b = document.createElement('button');
+      b.className = 'seg-btn' + (d === noteDuration ? ' active' : '');
+      b.textContent = d + 's';
+      b.addEventListener('click', () => {
+        noteDuration = d;
+        durDisplay.textContent = d + 's';
+        durSeg.querySelectorAll('.seg-btn').forEach(x => x.classList.remove('active'));
+        b.classList.add('active');
+      });
+      durSeg.appendChild(b);
+    });
+
+    // ── Note-letter selector ─────────────────────────────────────
+    const NOTE_LETTERS = ['C','D','E','F','G','A','B'];
+    const noteSeg     = document.getElementById('note-seg');
+    const noteDisplay = document.getElementById('note-display');
+
+    NOTE_LETTERS.forEach(letter => {
+      const b = document.createElement('button');
+      b.className = 'seg-btn' + (letter === baseNoteLetter ? ' active' : '');
+      b.textContent = letter;
+      b.addEventListener('click', () => {
+        baseNoteLetter = letter;
+        noteDisplay.textContent = letter;
+        noteSeg.querySelectorAll('.seg-btn').forEach(x => x.classList.remove('active'));
+        b.classList.add('active');
+        updateBadge();
+      });
+      noteSeg.appendChild(b);
+    });
+
+    // ── Octave selector ──────────────────────────────────────────
+    const octaveSeg       = document.getElementById('octave-seg');
+    const octaveDisplayNum = document.getElementById('octave-display-num');
+
+    for (let o = 1; o <= 6; o++) {
+      const b = document.createElement('button');
+      b.className = 'seg-btn' + (o === baseOctave ? ' active' : '');
+      b.textContent = o;
+      b.addEventListener('click', () => {
+        baseOctave = o;
+        octaveDisplayNum.textContent = o;
+        octaveSeg.querySelectorAll('.seg-btn').forEach(x => x.classList.remove('active'));
+        b.classList.add('active');
+        updateBadge();
+      });
+      octaveSeg.appendChild(b);
+    }
+
+    function updateBadge() {
+      document.getElementById('octave-display').textContent =
+        `Base · ${baseNoteLetter}${baseOctave}`;
+    }
+    updateBadge();
+  </script>
+</body>
+</html>

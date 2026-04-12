@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Melody Motion</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --navy:   #0d1b2a;
+      --teal:   #1b998b;
+      --gold:   #f4c542;
+      --cream:  #fdf8f0;
+      --muted:  #8a99aa;
+      --white:  #ffffff;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--navy);
+      color: var(--white);
+      overflow-x: hidden;
+    }
+
+    /* ── HERO ── */
+    header {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem;
+      overflow: hidden;
+    }
+
+    /* animated wave background */
+    header::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 30%, rgba(27,153,139,.25) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 80% 70%, rgba(244,197,66,.12) 0%, transparent 55%),
+        var(--navy);
+      z-index: 0;
+    }
+
+    /* floating music notes */
+    .notes-bg {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .note {
+      position: absolute;
+      font-size: 2rem;
+      opacity: 0.08;
+      animation: floatNote linear infinite;
+      color: var(--teal);
+    }
+    .note:nth-child(2)  { font-size:3rem; color: var(--gold); animation-duration:18s; left:12%; top:80%; }
+    .note:nth-child(3)  { font-size:1.5rem; animation-duration:22s; left:25%; top:90%; animation-delay:-5s; }
+    .note:nth-child(4)  { font-size:2.5rem; color: var(--gold); animation-duration:15s; left:50%; top:85%; animation-delay:-8s; }
+    .note:nth-child(5)  { font-size:1.8rem; animation-duration:20s; left:70%; top:88%; animation-delay:-3s; }
+    .note:nth-child(6)  { font-size:3.2rem; color: var(--gold); animation-duration:25s; left:85%; top:90%; animation-delay:-12s; }
+    .note:nth-child(7)  { font-size:1.4rem; animation-duration:17s; left:5%;  top:75%; animation-delay:-6s; }
+    .note:nth-child(8)  { font-size:2.2rem; color:var(--gold); animation-duration:21s; left:93%; top:78%; animation-delay:-9s; }
+
+    @keyframes floatNote {
+      0%   { transform: translateY(0) rotate(-10deg); opacity:.08; }
+      50%  { opacity:.14; }
+      100% { transform: translateY(-110vh) rotate(20deg); opacity:0; }
+    }
+
+    /* sound-wave SVG bars */
+    .wave-decoration {
+      display: flex;
+      align-items: flex-end;
+      gap: 4px;
+      margin-bottom: 1.8rem;
+      z-index: 1;
+    }
+    .wave-decoration span {
+      display: block;
+      width: 5px;
+      border-radius: 3px;
+      background: var(--teal);
+      animation: wavePulse 1.2s ease-in-out infinite;
+    }
+    .wave-decoration span:nth-child(1){ height:18px; animation-delay:0s; }
+    .wave-decoration span:nth-child(2){ height:32px; animation-delay:.15s; background:var(--gold); }
+    .wave-decoration span:nth-child(3){ height:24px; animation-delay:.3s; }
+    .wave-decoration span:nth-child(4){ height:40px; animation-delay:.45s; background:var(--gold); }
+    .wave-decoration span:nth-child(5){ height:28px; animation-delay:.6s; }
+    .wave-decoration span:nth-child(6){ height:36px; animation-delay:.75s; background:var(--gold); }
+    .wave-decoration span:nth-child(7){ height:20px; animation-delay:.9s; }
+
+    @keyframes wavePulse {
+      0%,100%{ transform:scaleY(1); }
+      50%    { transform:scaleY(1.6); }
+    }
+
+    header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(3.2rem, 9vw, 7rem);
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: -1px;
+      z-index: 1;
+      animation: fadeUp .9s ease both;
+    }
+    header h1 span { color: var(--teal); }
+
+    header p.tagline {
+      margin-top: 1.2rem;
+      font-size: clamp(1rem, 2.5vw, 1.3rem);
+      font-weight: 300;
+      color: var(--muted);
+      max-width: 560px;
+      line-height: 1.6;
+      z-index: 1;
+      animation: fadeUp .9s .2s ease both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(28px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+
+    /* ── MUSIC IMAGE STRIP ── */
+    .image-strip {
+      display: flex;
+      gap: 1.2rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      padding: 3.5rem 2rem 0;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .img-card {
+      position: relative;
+      border-radius: 18px;
+      overflow: hidden;
+      flex: 1 1 220px;
+      max-width: 280px;
+      aspect-ratio: 4/3;
+      border: 1.5px solid rgba(27,153,139,.3);
+      transition: transform .35s ease, box-shadow .35s ease;
+    }
+    .img-card:hover { transform: translateY(-6px); box-shadow: 0 20px 50px rgba(27,153,139,.25); }
+
+    .img-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      filter: brightness(.75) saturate(1.15);
+      transition: filter .35s;
+    }
+    .img-card:hover img { filter: brightness(.9) saturate(1.3); }
+
+    .img-card .img-label {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: .6rem 1rem;
+      background: linear-gradient(transparent, rgba(13,27,42,.85));
+      font-size: .8rem;
+      font-weight: 500;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--cream);
+    }
+
+    /* ── SECTION WRAPPER ── */
+    section {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 5rem 2rem;
+    }
+
+    .section-label {
+      font-size: .75rem;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--teal);
+      margin-bottom: .6rem;
+      font-weight: 500;
+    }
+
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 700;
+      line-height: 1.15;
+      margin-bottom: 1rem;
+    }
+
+    .section-subtitle {
+      font-size: 1.05rem;
+      color: var(--muted);
+      max-width: 540px;
+      line-height: 1.7;
+      margin-bottom: 3rem;
+    }
+
+    /* ── THREE BUTTONS ── */
+    .buttons-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.6rem;
+    }
+
+    .feature-btn {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: .75rem;
+      padding: 2rem 1.8rem;
+      border-radius: 20px;
+      background: rgba(255,255,255,.04);
+      border: 1.5px solid rgba(255,255,255,.09);
+      text-decoration: none;
+      color: var(--white);
+      overflow: hidden;
+      transition: background .3s, border-color .3s, transform .3s;
+      cursor: pointer;
+    }
+    .feature-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transition: opacity .3s;
+    }
+    .feature-btn:nth-child(1)::before { background: linear-gradient(135deg,rgba(27,153,139,.18),transparent); }
+    .feature-btn:nth-child(2)::before { background: linear-gradient(135deg,rgba(244,197,66,.15),transparent); }
+    .feature-btn:nth-child(3)::before { background: linear-gradient(135deg,rgba(27,153,139,.12),rgba(244,197,66,.08)); }
+
+    .feature-btn:hover {
+      border-color: rgba(27,153,139,.5);
+      transform: translateY(-4px);
+      background: rgba(255,255,255,.07);
+    }
+    .feature-btn:hover::before { opacity: 1; }
+
+    .btn-icon {
+      font-size: 2rem;
+      width: 52px; height: 52px;
+      border-radius: 14px;
+      background: rgba(27,153,139,.15);
+      border: 1px solid rgba(27,153,139,.3);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .feature-btn:nth-child(2) .btn-icon {
+      background: rgba(244,197,66,.12);
+      border-color: rgba(244,197,66,.3);
+    }
+
+    .btn-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+    .btn-desc {
+      font-size: .9rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .btn-arrow {
+      margin-top: auto;
+      font-size: .85rem;
+      color: var(--teal);
+      font-weight: 500;
+      letter-spacing: .05em;
+      display: flex;
+      align-items: center;
+      gap: .3rem;
+    }
+    .feature-btn:nth-child(2) .btn-arrow { color: var(--gold); }
+
+    /* ── DIVIDER ── */
+    .divider {
+      border: none;
+      border-top: 1px solid rgba(255,255,255,.07);
+      margin: 0 2rem;
+    }
+
+    /* ── ABOUT SECTION ── */
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+    }
+    @media (max-width: 700px) { .about-grid { grid-template-columns: 1fr; } }
+
+    .about-img-wrap {
+      position: relative;
+      border-radius: 22px;
+      overflow: hidden;
+      border: 1.5px solid rgba(27,153,139,.3);
+    }
+    .about-img-wrap img {
+      width: 100%;
+      display: block;
+      object-fit: cover;
+      max-height: 380px;
+    }
+    .about-img-wrap .img-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom right, rgba(27,153,139,.12), rgba(244,197,66,.07));
+    }
+
+    /* placeholder for user-supplied image */
+    .bwsi-img-placeholder {
+      width: 100%;
+      min-height: 280px;
+      background: rgba(255,255,255,.04);
+      border: 2px dashed rgba(27,153,139,.35);
+      border-radius: 22px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: .5rem;
+      color: var(--muted);
+      font-size: .9rem;
+      text-align: center;
+      padding: 1.5rem;
+    }
+    .bwsi-img-placeholder span { font-size: 2.5rem; }
+
+    .about-text .section-subtitle {
+      max-width: 100%;
+    }
+
+    /* Description placeholder */
+    .description-placeholder {
+      background: rgba(255,255,255,.04);
+      border: 2px dashed rgba(255,255,255,.12);
+      border-radius: 14px;
+      padding: 1.4rem 1.6rem;
+      color: var(--muted);
+      font-size: .95rem;
+      line-height: 1.7;
+      font-style: italic;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 2.5rem 1rem;
+      font-size: .8rem;
+      color: rgba(255,255,255,.25);
+      border-top: 1px solid rgba(255,255,255,.06);
+    }
+    footer span { color: var(--teal); }
+  </style>
+</head>
+<body>
+
+  <!-- ══════════ HERO ══════════ -->
+  <header>
+    <div class="notes-bg">
+      <div class="note">♩</div>
+      <div class="note">♪</div>
+      <div class="note">♫</div>
+      <div class="note">♬</div>
+      <div class="note">♩</div>
+      <div class="note">♪</div>
+      <div class="note">𝄞</div>
+      <div class="note">♫</div>
+    </div>
+
+    <div class="wave-decoration" aria-hidden="true">
+      <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+    </div>
+
+    <h1>Melody <span>Motion</span></h1>
+    <p class="tagline">
+      Making music accessible to everyone — no matter your physical abilities.
+      Express yourself through sound, motion, and creativity.
+    </p>
+  </header>
+
+  <!-- ══════════ MUSIC IMAGES ══════════ -->
+  <div class="image-strip">
+    <!-- Piano keys (free Unsplash) -->
+    <div class="img-card">
+      <img src="https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?w=600&q=80" alt="Piano keys"/>
+      <div class="img-label">Keys &amp; Rhythm</div>
+    </div>
+    <!-- Music notes sheet -->
+    <div class="img-card">
+      <img src="https://images.unsplash.com/photo-1507838153414-b4b713384a76?w=600&q=80" alt="Sheet music"/>
+      <div class="img-label">Sheet Music</div>
+    </div>
+    <!-- Headphones/music -->
+    <div class="img-card">
+      <img src="https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=600&q=80" alt="Music instruments"/>
+      <div class="img-label">Sound &amp; Motion</div>
+    </div>
+  </div>
+
+  <!-- ══════════ THREE FEATURE BUTTONS ══════════ -->
+  <section>
+    <p class="section-label">Get Started</p>
+    <h2 class="section-title">Choose Your Experience</h2>
+    <p class="section-subtitle">
+      Pick the mode that works best for you. Each pathway is designed to be
+      fully accessible and joyful to explore.
+    </p>
+
+    <div class="buttons-grid">
+
+      <!-- BUTTON 1 — replace # with your link -->
+      <a href="../MelodyMotion/keyboard.html" class="feature-btn">
+        <div class="btn-icon">🎹</div>
+        <div class="btn-title">Play with Keys</div>
+        <p class="btn-desc">
+          Use simple key presses or switches to play melodies and compose music hands-free.
+        </p>
+        <div class="btn-arrow">Explore → </div>
+      </a>
+
+      <!-- BUTTON 2 — Motion Music -->
+      <a href="https://melodymotion-gesture-play.base44.app/" class="feature-btn">
+        <div class="btn-icon">🎵</div>
+        <div class="btn-title">Motion Music</div>
+        <p class="btn-desc">
+          Control sound through body movement and gestures — no fine motor skills required.
+        </p>
+        <div class="btn-arrow">Explore →</div>
+      </a>
+
+      <!-- BUTTON 3 — replace # with your link -->
+      <a href="../MelodyMotion/touchpad.html" class="feature-btn">
+        <div class="btn-icon">🖱️</div>
+        <div class="btn-title">Touchpad</div>
+        <p class="btn-desc">
+          Use a touchpad or trackpad to tap, swipe, and create music with ease — no complex hand movements needed.
+        </p>
+        <div class="btn-arrow">Explore →</div>
+      </a>
+
+    </div>
+  </section>
+
+  <hr class="divider"/>
+
+  <!-- ══════════ ABOUT THE CHALLENGE ══════════ -->
+  <section>
+    <p class="section-label">About</p>
+    <h2 class="section-title">The BWSI Create Challenge</h2>
+
+    <div class="about-grid">
+
+      <!-- LEFT: BWSI image — replace the placeholder with an <img> tag when ready -->
+      <div>
+        <!--
+          ════════════════════════════════════════════
+          TODO: Replace this placeholder div with:
+          <div class="about-img-wrap">
+            <img src="YOUR_BWSI_IMAGE.jpg" alt="BWSI Create Challenge"/>
+            <div class="img-overlay"></div>
+          </div>
+          ════════════════════════════════════════════
+        -->
+        <div class="bwsi-img-placeholder">
+          <span>🖼️</span>
+          <strong>Add your BWSI Create Challenge image here</strong>
+          <p>Replace this placeholder block in the HTML with your &lt;img&gt; tag</p>
+        </div>
+      </div>
+
+      <!-- RIGHT: Description text -->
+      <div class="about-text">
+        <p class="section-subtitle">
+          Melody Motion was built as part of the Beaver Works Summer Institute (BWSI)
+          Create Challenge — an initiative that empowers students to design technology
+          that makes a real difference.
+        </p>
+
+        <!--
+          ════════════════════════════════════════════
+          TODO: Replace the content inside this div
+          with your own description text.
+          ════════════════════════════════════════════
+        -->
+        <div class="description-placeholder">
+          ✏️ <strong>Your description goes here.</strong><br/><br/>
+          Replace this placeholder text in the HTML with your own paragraph(s) describing
+          the BWSI Create Challenge, the mission of Melody Motion, and anything else
+          you'd like visitors to know.
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══════════ FOOTER ══════════ -->
+  <footer>
+    Made with <span>♥</span> for the BWSI Create Challenge &nbsp;·&nbsp; Melody Motion
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Melody Motion · Touchpad</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --black:    #060608;
+      --deep:     #0c0a12;
+      --purple:   #7b2ff7;
+      --purple2:  #a855f7;
+      --electric: #bf5fff;
+      --glow:     #d49eff;
+      --dim:      #2a1a40;
+      --text:     #e8d5ff;
+      --muted:    #6b4d8a;
+      --white:    #ffffff;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Share Tech Mono', monospace;
+      background: var(--black);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ── GRID BACKGROUND ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(123,47,247,.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(123,47,247,.07) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 70% 50% at 50% 0%, rgba(123,47,247,.18) 0%, transparent 65%),
+        radial-gradient(ellipse 40% 30% at 80% 80%, rgba(191,95,255,.1) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── HEADER ── */
+    header {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 2.5rem 1rem 1rem;
+      width: 100%;
+    }
+
+    .back-link {
+      position: absolute;
+      left: 1.5rem;
+      top: 2.8rem;
+      font-size: .75rem;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      transition: color .2s;
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+    }
+    .back-link:hover { color: var(--electric); }
+
+    .logo-tag {
+      font-size: .7rem;
+      letter-spacing: .25em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: .4rem;
+    }
+
+    h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(2rem, 6vw, 3.8rem);
+      font-weight: 900;
+      letter-spacing: .08em;
+      background: linear-gradient(135deg, var(--electric), var(--purple2), var(--glow));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: none;
+      animation: flicker 6s ease-in-out infinite;
+    }
+
+    @keyframes flicker {
+      0%,95%,100% { opacity:1; }
+      96%          { opacity:.85; }
+      97%          { opacity:1; }
+      98%          { opacity:.9; }
+    }
+
+    .subtitle {
+      font-size: .8rem;
+      color: var(--muted);
+      letter-spacing: .15em;
+      margin-top: .5rem;
+      text-transform: uppercase;
+    }
+
+    /* ── OCTAVE INDICATOR ── */
+    .octave-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      margin-top: 1rem;
+      padding: .35rem 1rem;
+      border: 1px solid rgba(123,47,247,.4);
+      border-radius: 999px;
+      font-size: .75rem;
+      letter-spacing: .12em;
+      color: var(--electric);
+      background: rgba(123,47,247,.08);
+    }
+    .octave-badge .dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--purple2);
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%,100% { box-shadow: 0 0 4px var(--purple2); }
+      50%      { box-shadow: 0 0 12px var(--electric); }
+    }
+
+    /* ── NOTE BUTTONS GRID ── */
+    main {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2.5rem;
+      padding: 2rem 1.5rem 3rem;
+      width: 100%;
+      max-width: 700px;
+    }
+
+    .notes-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.2rem;
+      width: 100%;
+    }
+
+    /* individual note button */
+    .note-btn {
+      position: relative;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      border: 2px solid rgba(123,47,247,.5);
+      background: radial-gradient(circle at 35% 35%, rgba(123,47,247,.25), rgba(6,6,8,.9));
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: .25rem;
+      outline: none;
+      transition: transform .15s, border-color .15s, box-shadow .15s;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .note-btn::before {
+      content: '';
+      position: absolute;
+      inset: -3px;
+      border-radius: 50%;
+      background: conic-gradient(var(--purple), var(--electric), var(--purple));
+      z-index: -1;
+      opacity: 0;
+      transition: opacity .2s;
+    }
+
+    .note-btn:hover {
+      border-color: var(--electric);
+      box-shadow: 0 0 18px rgba(191,95,255,.35), inset 0 0 12px rgba(123,47,247,.2);
+      transform: scale(1.05);
+    }
+    .note-btn:active, .note-btn.playing {
+      transform: scale(.95);
+      border-color: var(--glow);
+      box-shadow: 0 0 32px rgba(212,158,255,.6), 0 0 60px rgba(123,47,247,.4), inset 0 0 20px rgba(191,95,255,.25);
+      background: radial-gradient(circle at 35% 35%, rgba(191,95,255,.45), rgba(20,8,40,.95));
+    }
+    .note-btn.playing::before { opacity: .5; }
+
+    .note-solfege {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(1.2rem, 4vw, 1.8rem);
+      font-weight: 700;
+      color: var(--white);
+      letter-spacing: .05em;
+      line-height: 1;
+    }
+    .note-name {
+      font-size: clamp(.55rem, 1.8vw, .7rem);
+      color: var(--electric);
+      letter-spacing: .15em;
+      text-transform: uppercase;
+    }
+
+    /* color-code each note */
+    .note-btn[data-note="Do"]  { --nc: #b44dff; }
+    .note-btn[data-note="Re"]  { --nc: #9b3fef; }
+    .note-btn[data-note="Mi"]  { --nc: #8833dd; }
+    .note-btn[data-note="Fa"]  { --nc: #a040f0; }
+    .note-btn[data-note="Sol"] { --nc: #c060ff; }
+    .note-btn[data-note="La"]  { --nc: #d080ff; }
+    .note-btn[data-note="Ti"]  { --nc: #e0a0ff; }
+    .note-btn[data-note="Do2"] { --nc: #bf5fff; }
+
+    .note-btn { border-color: rgba(var(--nc, 123,47,247),.5); }
+    .note-btn:hover { border-color: var(--nc, var(--electric)); }
+
+    /* ripple on click */
+    @keyframes ripple {
+      0%   { transform: scale(.8); opacity:.7; }
+      100% { transform: scale(2.4); opacity:0; }
+    }
+    .ripple-ring {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      border: 2px solid var(--electric);
+      animation: ripple .5s ease-out forwards;
+      pointer-events: none;
+    }
+
+    /* ── WAVEFORM VISUALIZER ── */
+    .visualizer {
+      width: 100%;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+    }
+    .vis-bar {
+      width: 4px;
+      border-radius: 2px;
+      background: var(--purple2);
+      height: 4px;
+      transition: height .08s ease, background .1s;
+    }
+
+    /* ── BASE NOTE / OCTAVE SELECTORS ── */
+    .controls-wrap {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .ctrl-row {
+      background: rgba(123,47,247,.06);
+      border: 1px solid rgba(123,47,247,.2);
+      border-radius: 16px;
+      padding: 1.2rem 1.6rem;
+    }
+
+    .ctrl-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: .9rem;
+    }
+    .ctrl-label {
+      font-size: .68rem;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .ctrl-value {
+      font-family: 'Orbitron', sans-serif;
+      font-size: .95rem;
+      font-weight: 700;
+      color: var(--electric);
+      letter-spacing: .1em;
+      min-width: 2.5ch;
+      text-align: right;
+    }
+
+    /* segmented button row */
+    .seg-row {
+      display: flex;
+      gap: .5rem;
+    }
+    .seg-btn {
+      flex: 1;
+      padding: .55rem .2rem;
+      border-radius: 10px;
+      border: 1.5px solid rgba(123,47,247,.3);
+      background: rgba(123,47,247,.07);
+      color: var(--muted);
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(.75rem, 2.5vw, .95rem);
+      font-weight: 700;
+      letter-spacing: .06em;
+      cursor: pointer;
+      transition: background .15s, border-color .15s, color .15s, box-shadow .15s, transform .1s;
+      text-align: center;
+    }
+    .seg-btn:hover {
+      border-color: rgba(191,95,255,.5);
+      color: var(--glow);
+    }
+    .seg-btn.active {
+      background: rgba(123,47,247,.35);
+      border-color: var(--electric);
+      color: var(--white);
+      box-shadow: 0 0 14px rgba(191,95,255,.4), inset 0 0 8px rgba(123,47,247,.2);
+    }
+    .seg-btn:active { transform: scale(.94); }
+
+    /* ── FOOTER ── */
+    footer {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 1.5rem;
+      font-size: .65rem;
+      color: var(--muted);
+      letter-spacing: .15em;
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="index.html" class="back-link">← Back</a>
+    <div class="logo-tag">Melody Motion</div>
+    <h1>TOUCHPAD</h1>
+    <p class="subtitle">Tap a note · Feel the sound</p>
+    <div class="octave-badge">
+      <span class="dot"></span>
+      <span id="octave-display">Base · C4</span>
+    </div>
+  </header>
+
+  <main>
+    <!-- WAVEFORM VISUALIZER -->
+    <div class="visualizer" id="visualizer"></div>
+
+    <!-- NOTE BUTTONS -->
+    <div class="notes-grid" id="notes-grid">
+      <!-- buttons injected by JS -->
+    </div>
+
+    <!-- BASE NOTE + OCTAVE CONTROLS -->
+    <div class="controls-wrap">
+
+      <!-- Row 1: Note letter (A B C D E F G) -->
+      <div class="ctrl-row">
+        <div class="ctrl-header">
+          <span class="ctrl-label">Base Note</span>
+          <span class="ctrl-value" id="note-display">C</span>
+        </div>
+        <div class="seg-row" id="note-seg">
+          <!-- injected by JS -->
+        </div>
+      </div>
+
+      <!-- Row 2: Octave number (1–6) -->
+      <div class="ctrl-row">
+        <div class="ctrl-header">
+          <span class="ctrl-label">Octave</span>
+          <span class="ctrl-value" id="octave-display-num">4</span>
+        </div>
+        <div class="seg-row" id="octave-seg">
+          <!-- injected by JS -->
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer>Melody Motion · Touchpad Module</footer>
+
+  <script>
+    // ── Solfège data ──────────────────────────────────────────────
+    const NOTES = [
+      { solfege: 'Do',  name: 'Root',    semitone: 0  },
+      { solfege: 'Re',  name: '2nd',     semitone: 2  },
+      { solfege: 'Mi',  name: '3rd',     semitone: 4  },
+      { solfege: 'Fa',  name: '4th',     semitone: 5  },
+      { solfege: 'Sol', name: '5th',     semitone: 7  },
+      { solfege: 'La',  name: '6th',     semitone: 9  },
+      { solfege: 'Ti',  name: '7th',     semitone: 11 },
+      { solfege: 'Do²', name: 'Octave',  semitone: 12, dataNote: 'Do2' },
+    ];
+
+    let audioCtx = null;
+
+    function getAudioCtx() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      return audioCtx;
+    }
+
+    // frequency from MIDI note number
+    function midiToFreq(midi) {
+      return 440 * Math.pow(2, (midi - 69) / 12);
+    }
+
+    // C1 = MIDI 24, C2=36 …
+
+    // ── Audio playback — hold to sustain, click for staccato ─────
+    // Each button gets its own live nodes so releases are clean
+    const CLICK_THRESHOLD_MS = 180; // under this = short click
+
+    function startNote(semitone) {
+      const ctx = getAudioCtx();
+      const freq = computeBaseFreq() * Math.pow(2, semitone / 12);
+
+      const osc  = ctx.createOscillator();
+      const osc2 = ctx.createOscillator();
+      osc.type  = 'sine';
+      osc2.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, ctx.currentTime);
+      osc2.frequency.setValueAtTime(freq * 2, ctx.currentTime);
+
+      const gain  = ctx.createGain();
+      const gain2 = ctx.createGain();
+
+      // attack
+      gain.gain.setValueAtTime(0, ctx.currentTime);
+      gain.gain.linearRampToValueAtTime(.45, ctx.currentTime + .015);
+      gain2.gain.setValueAtTime(0, ctx.currentTime);
+      gain2.gain.linearRampToValueAtTime(.08, ctx.currentTime + .02);
+
+      osc.connect(gain);    gain.connect(ctx.destination);
+      osc2.connect(gain2);  gain2.connect(ctx.destination);
+
+      osc.start();
+      osc2.start();
+
+      animateVisualizer(freq, true); // sustained mode
+
+      return { osc, osc2, gain, gain2, freq };
+    }
+
+    function releaseNote(nodes, wasShortClick) {
+      if (!nodes) return;
+      const ctx  = getAudioCtx();
+      const now  = ctx.currentTime;
+      const tail = wasShortClick ? 0.55 : 0.18; // click = natural decay, hold = quick release
+
+      nodes.gain.gain.cancelScheduledValues(now);
+      nodes.gain.gain.setValueAtTime(nodes.gain.gain.value, now);
+      nodes.gain.gain.exponentialRampToValueAtTime(.0001, now + tail);
+
+      nodes.gain2.gain.cancelScheduledValues(now);
+      nodes.gain2.gain.setValueAtTime(Math.max(nodes.gain2.gain.value, .0001), now);
+      nodes.gain2.gain.exponentialRampToValueAtTime(.0001, now + tail * .8);
+
+      nodes.osc.stop(now + tail + .05);
+      nodes.osc2.stop(now + tail + .05);
+
+      if (!wasShortClick) stopVisualizer();
+    }
+
+    // ── Build buttons ─────────────────────────────────────────────
+    const grid = document.getElementById('notes-grid');
+
+    NOTES.forEach(n => {
+      const btn = document.createElement('button');
+      btn.className = 'note-btn';
+      btn.setAttribute('data-note', n.dataNote || n.solfege);
+      btn.innerHTML = `
+        <span class="note-solfege">${n.solfege}</span>
+        <span class="note-name">${n.name}</span>
+      `;
+
+      let activeNodes  = null;
+      let pressTime    = 0;
+
+      btn.addEventListener('pointerdown', e => {
+        e.preventDefault();
+        // stop any currently playing note on this button first
+        if (activeNodes) {
+          releaseNote(activeNodes, false);
+          activeNodes = null;
+        }
+        pressTime   = performance.now();
+        activeNodes = startNote(n.semitone);
+        btn.classList.add('playing');
+        btn.setPointerCapture(e.pointerId);
+      });
+
+      const onRelease = () => {
+        if (!activeNodes) return;
+        const held = performance.now() - pressTime;
+        const wasShortClick = held < CLICK_THRESHOLD_MS;
+        releaseNote(activeNodes, wasShortClick);
+        activeNodes = null;
+        btn.classList.remove('playing');
+      };
+
+      btn.addEventListener('pointerup',     onRelease);
+      btn.addEventListener('pointercancel', onRelease);
+      btn.addEventListener('pointerleave',  onRelease);
+
+      // ripple on press
+      btn.addEventListener('pointerdown', () => {
+        const ring = document.createElement('div');
+        ring.className = 'ripple-ring';
+        btn.appendChild(ring);
+        ring.addEventListener('animationend', () => ring.remove());
+      });
+
+      grid.appendChild(btn);
+    });
+
+    // ── Visualizer ────────────────────────────────────────────────
+    const visEl = document.getElementById('visualizer');
+    const BAR_COUNT = 32;
+    const bars = [];
+    for (let i = 0; i < BAR_COUNT; i++) {
+      const b = document.createElement('div');
+      b.className = 'vis-bar';
+      visEl.appendChild(b);
+      bars.push(b);
+    }
+
+    let visRafId = null;
+    let visSustained = false;
+    let visStartTime = 0;
+
+    function animateVisualizer(freq, sustained = false) {
+      if (visRafId) cancelAnimationFrame(visRafId);
+      visSustained = sustained;
+      visStartTime = performance.now();
+
+      function frame(now) {
+        const t = (now - visStartTime) / 1200;
+        // if sustained, loop the animation; if not, decay and stop
+        const phase = visSustained ? (now / 600) : t;
+        const decay = visSustained ? 1 : Math.max(0, 1 - t);
+
+        if (!visSustained && t >= 1) {
+          bars.forEach(b => b.style.height = '4px');
+          visRafId = null;
+          return;
+        }
+
+        bars.forEach((b, i) => {
+          const wave = Math.sin(phase * 6 + i * .45) * decay;
+          const h = 4 + Math.max(0, wave) * 40;
+          b.style.height = h + 'px';
+          b.style.background = decay > .7 ? 'var(--glow)' : 'var(--purple2)';
+        });
+        visRafId = requestAnimationFrame(frame);
+      }
+      visRafId = requestAnimationFrame(frame);
+    }
+
+    function stopVisualizer() {
+      visSustained = false; // let current frame loop decay naturally
+    }
+
+    // ── Note + Octave segmented controls ──────────────────────────
+    const NOTE_LETTERS = ['C','D','E','F','G','A','B'];
+    // semitone offset from C for each note letter
+    const NOTE_SEMITONES = { C:0, D:2, E:4, F:5, G:7, A:9, B:11 };
+
+    let baseNoteLetter = 'C';
+    let baseOctave     = 4;
+
+    function computeBaseFreq() {
+      // MIDI: C1=24, each octave +12
+      const midiC1 = 24;
+      const midi = midiC1 + (baseOctave - 1) * 12 + NOTE_SEMITONES[baseNoteLetter];
+      return midiToFreq(midi);
+    }
+
+    function updateBadge() {
+      const display = document.getElementById('octave-display');
+      if (display) display.textContent = `Base · ${baseNoteLetter}${baseOctave}`;
+    }
+
+    // Build note-letter buttons
+    const noteSeg = document.getElementById('note-seg');
+    const noteDisplay = document.getElementById('note-display');
+    NOTE_LETTERS.forEach(letter => {
+      const b = document.createElement('button');
+      b.className = 'seg-btn' + (letter === baseNoteLetter ? ' active' : '');
+      b.textContent = letter;
+      b.addEventListener('click', () => {
+        baseNoteLetter = letter;
+        noteDisplay.textContent = letter;
+        noteSeg.querySelectorAll('.seg-btn').forEach(x => x.classList.remove('active'));
+        b.classList.add('active');
+        updateBadge();
+      });
+      noteSeg.appendChild(b);
+    });
+
+    // Build octave buttons (1–6)
+    const octaveSeg = document.getElementById('octave-seg');
+    const octaveDisplayNum = document.getElementById('octave-display-num');
+    for (let o = 1; o <= 6; o++) {
+      const b = document.createElement('button');
+      b.className = 'seg-btn' + (o === baseOctave ? ' active' : '');
+      b.textContent = o;
+      b.addEventListener('click', () => {
+        baseOctave = o;
+        octaveDisplayNum.textContent = o;
+        octaveSeg.querySelectorAll('.seg-btn').forEach(x => x.classList.remove('active'));
+        b.classList.add('active');
+        updateBadge();
+      });
+      octaveSeg.appendChild(b);
+    }
+
+    updateBadge();
+  </script>
+</body>
+</html>
